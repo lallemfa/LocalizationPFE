@@ -1,4 +1,3 @@
-import numpy as np
 from math import sqrt
 import matplotlib.pyplot as plt
 
@@ -14,7 +13,7 @@ class Simulation:
         return "Simulation\n\tdt -> {}\n".format(self.dt)
 
     def validateWaypoint(self, waypoint):
-        robot_pose = self.robot.curr_state.pose
+        robot_pose = self.robot.true_curr_state.pose
         
         return sqrt(sum((waypoint - robot_pose)**2)) < 2.0
         
@@ -25,8 +24,8 @@ class Simulation:
         return 0
     
     def runMission(self, mission, plot_flag = 0):
-
-        fig 	= plt.figure()
+        
+        fig 	= plt.figure("Run plot")
         ax 	= fig.add_subplot(111, projection = '3d')
     
         print("Begin run mission")
@@ -44,14 +43,19 @@ class Simulation:
                     
                     plt.show()
                     
-                    plt.pause(1e-8)
+                    plt.pause(1e-15)
                     
         print("End run mission")
         
-        ax.clear()
+        self.plot(ax, mission)
         
-        mission.plot(ax)
-        self.environment.plot(ax, 15)
-        self.robot.plot(ax)
+    def plot(self, axis, mission):
+        axis.clear()
+        
+        mission.plot(axis)
+        self.environment.plot(axis, 15)
+        self.robot.plot(axis)
+        
+        plt.legend()
         
         plt.show()

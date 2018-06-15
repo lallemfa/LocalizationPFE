@@ -40,6 +40,6 @@ class Mission:
         return waypoints
 
     def plot(self, axis):
-        plot = axis.plot(self.waypoints[0, :], self.waypoints[1, :], 'bd')
+        plot = axis.plot(self.waypoints[0, :], self.waypoints[1, :], 'bd', label='Waypoints')
         return plot
 

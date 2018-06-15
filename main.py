@@ -1,21 +1,19 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import time
+
+import numpy as np
 
 from Environment import Environment
 from Mission import Mission
 from Robot import Robot
 from Simulation import Simulation
+from INS import INS
+from Sonar import Sonar
+from Matcher import Matcher
 
+import dill
 
+import cv2
 
-start = time.time()
+filename = 'run_data_cubic_200x200_100x100_without_noise.pkl'
 
-environment = Environment("cloud.npz")
-mission = Mission(environment)
-robot = Robot(np.array([4.49652985e+5, 4.951035090e+06, 0]))
-simulation = Simulation(0.5, environment, [mission], robot)
-
-simulation.run(0)
-
-print( "Time elapsed : {} seconds.".format(time.time() - start) )
+dill.load_session(filename)

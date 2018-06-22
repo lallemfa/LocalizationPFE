@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 
 from numpy.linalg import inv, eig, norm
 
+from scipy.linalg import sqrtm
+
 from matplotlib.patches import Ellipse
 
 def sawtooth(x):
@@ -70,7 +72,7 @@ def draw_disk(center, radius, ax, color = 'r'):
 
 def computeMinorAndMajorAxisAndAngle(Gamma, precision):
     
-    A = scipy.linalg.sqrtm(-2*np.log(1-precision)*Gamma)
+    A = sqrtm(-2*np.log(1-precision)*Gamma)
         
     eigenvalues, eigenvectors = eig(A)
     

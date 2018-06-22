@@ -48,16 +48,15 @@ class StructMatch:
 #         Cmnpute descriptors amd matches
 # =============================================================================
         
-        kp1, des1 = self.finder.detectAndCompute(img1,None)
-        kp2, des2 = self.finder.detectAndCompute(img2,None)
+        kp1, des1 = self.finder.detectAndCompute(img1, None)
+        kp2, des2 = self.finder.detectAndCompute(img2, None)
         
-        if des2 is None or des2.shape[0] == 1:
-            print("Not enough keypoints are found on base image")
+        if (des2 is None or des2.shape[0] == 1 or des1 is None or des1.shape[0] == 1):
+            if __name__ == '__main__':
+                print("Not enough keypoints are found on base image")
             return center, R, T
         
         matches = self.flann.knnMatch(des1, des2, k = 2)
-        
-        # store all the good matches as per Lowe's ratio test.
         
 # =============================================================================
 #         Keep good matches according to Lowe's ratio test
@@ -98,24 +97,25 @@ class StructMatch:
     
                 rigid_pts = np.reshape(rigid_pts.T, (4, 1, 2))
                 
-                x = int(round(np.mean(rigid_pts[:, 0, 0])))
+                x = np.mean(rigid_pts[:, 0, 0])
                 
-                y = int(round(np.mean(rigid_pts[:, 0, 1])))
+                y = np.mean(rigid_pts[:, 0, 1])
                 
                 center = (x, y)
                 
                 false_center = np.array([[50],[50]])
                 false_center = R@false_center + T
                 
-                img2 = cv2.line(img2, (0, 0), (int(T[0,0]), int(T[1,0])), (255,0,0), 3)
-                img2 = cv2.line(img2, (0, 0), (int(false_center[0,0]), int(false_center[1,0])), (0,255,0), 3)
-                img2 = cv2.polylines(img2, [np.int32(rigid_pts)], True, (0, 255, 0), 3, cv2.LINE_AA)
-                img2 = cv2.circle(img2, center, 3, (255,0,0))
+
                 
                 if plot_flag:
+                    img2 = cv2.line(img2, (0, 0), (int(T[0,0]), int(T[1,0])), (255,0,0), 3)
+                    img2 = cv2.line(img2, (0, 0), (int(false_center[0,0]), int(false_center[1,0])), (0,255,0), 3)
+                    img2 = cv2.polylines(img2, [np.int32(rigid_pts)], True, (0, 255, 0), 3, cv2.LINE_AA)
+                    
                     self.plotMatch(img1, img2, kp1, kp2, good)
             
-        else:
+        elif __name__ == '__main__':
             print("Not enough matches are found - {}/{}".format(len(good), self.MIN_MATCH_COUNT))
             
         return center, R, T
@@ -137,25 +137,17 @@ if __name__ == '__main__':
     
     matcher = StructMatch("SURF")
     
-    
-#    img2 = cv2.imread('full_map_hsv.png') # trainImage
-#    img1 = cv2.imread("full_map_hsv.png") # queryImage
-#    
-#    sol = matcher.matchImages(img1, img2)
-    
     centers         = None
     rotations       = None
     translations    = None
     
-    
-    
-    
-    for i in range(1,316):
-#        img2 = cv2.imread('full_map_hsv.png') # trainImage
-        img2 = cv2.imread("Images/HQ_sonar_img_{}.png".format(i-1)) # queryImage
-#        img2 = cv2.imread("Images/map_img_{}.png".format(i)) # trainImage
+    for i in range(1,15902,50):
+        img2 = cv2.imread('Environment_data/area_3/Images/RGB/map_rgb_2m.png')
+#        img2 = cv2.imread("Environment_data/area_3/Images/RGB/RGB_sonar_view_state{}.png".format(i-50))
         
-        img1 = cv2.imread("Images/HQ_sonar_img_{}.png".format(i)) # queryImage
+        
+        img1 = cv2.imread("Environment_data/area_3/Images/RGB/RGB_sonar_view_state{}.png".format(i))     
+        
         
         center, R, T = matcher.matchImages(img1, img2, False)
 #        center, R, T = matcher.matchImages(img1, img2)
@@ -165,92 +157,9 @@ if __name__ == '__main__':
             rotations       = np.dstack((rotations, R)) if not rotations is None else R
             translations    = np.dstack((translations, T)) if not translations is None else T
         
-        
-        
-        
-        
-        
-        
-    angles = [0]
-    state = np.array([[0.0],
-                      [0.0]])
-    
-    diffs = np.array([[0.0], [0.0]])
-        
-    for i in range(1, centers.shape[2]):
-        
-        previous_psi    = angles[-1]
-        previous_X      = state[:, -1]
-        
-# =============================================================================
-#         Rotation
-# =============================================================================
-                
-        R = rotations[:, :, i]
-        
-        psi = rotmat2euler(R)
-        
-        angles.append(previous_psi + psi)
-#        angles.append(psi)
-        
-# =============================================================================
-#         Translation
-# =============================================================================
-        
-        trans = translations[:, :, i]
-        
-#        X = np.array([[50],[50]])
-#        X = R@X + trans
 
-        
-        
-        X = previous_X + rotmat(-previous_psi)@trans
-
-#        R2 = rotmat(-previous_psi)
-
-#        diff_center = centers[:, :, i].T - centers[:, :, i-1].T
-        
-#        print(centers[:, :, i].T)
-#        print(centers[:, :, i-1].T)
-#        print(diff_center)
-        
-        
-#        diffs = np.hstack((diffs, diff_center))
-        
-#        
-        
-#        print(previous_X)
-        
-#        center = np.array([[50],[50]])
-        
-#        X = np.reshape(state[:, -1], (2, 1)) + R2@trans
-#        X = R2@center + trans
-#        X = diffs[:, -1] + previous_X
-        
-#        X = np.reshape(X, (2, 1))
-        
-#        print(X)
-#        print(X.shape)
-#        print(state.shape)
-#        print("\n")
-        
-        
-        
-        state = np.hstack((state, X))
-    
+ 
     plt.figure("centers")
     plt.plot(centers[0, 0, :], centers[0, 1, :], 'b.')
     plt.show()
-    
-    plt.figure("Estimate")
-    plt.plot(state[0, :15], state[1, :15], 'b.')
-    plt.show()
-    
-    plt.figure("Angles")
-    plt.plot(angles, 'b.')
-    plt.show()
-    
-    plt.figure("Translations")
-    plt.plot(translations[0,0,:], translations[1,0,:], 'b.')
-    plt.show()
-    
+
